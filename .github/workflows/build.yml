@@ -20,11 +20,18 @@ jobs:
       - name: Find project directory
         id: proj
         run: |
-          echo "=== Cac file trong repo ==="
-          find . -maxdepth 3 -not -path './.git/*' | head -n 50
-          f=$(find . -maxdepth 4 \( -name build.gradle -o -name build.gradle.kts \) -not -path './.git/*' | head -n 1)
+          # Neu repo chi co file .zip thi tu giai nen
+          if [ -z "$(find . -maxdepth 4 -name build.gradle -not -path './.git/*' | head -n 1)" ]; then
+            z=$(find . -maxdepth 2 -name '*.zip' -not -path './.git/*' | head -n 1)
+            if [ -n "$z" ]; then
+              echo "Giai nen $z"
+              mkdir -p unzipped
+              unzip -q -o "$z" -d unzipped
+            fi
+          fi
+          f=$(find . -maxdepth 5 \( -name build.gradle -o -name build.gradle.kts \) -not -path './.git/*' | head -n 1)
           if [ -z "$f" ]; then
-            echo "::error::Khong tim thay build.gradle. Hay giai nen zip va up cac file (build.gradle, src/, settings.gradle...) len repo, khong up file .zip."
+            echo "::error::Khong tim thay build.gradle"
             exit 1
           fi
           d=$(dirname "$f")
