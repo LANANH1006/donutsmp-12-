@@ -17,12 +17,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Tu tim thu muc chua build.gradle (ke ca khi ban up nguyen thu muc "donutlike/" len GitHub)
       - name: Find project directory
         id: proj
         run: |
-          f=$(find . -maxdepth 3 -name build.gradle -not -path './.git/*' | head -n 1)
-          if [ -z "$f" ]; then echo "Khong tim thay build.gradle"; exit 1; fi
+          echo "=== Cac file trong repo ==="
+          find . -maxdepth 3 -not -path './.git/*' | head -n 50
+          f=$(find . -maxdepth 4 \( -name build.gradle -o -name build.gradle.kts \) -not -path './.git/*' | head -n 1)
+          if [ -z "$f" ]; then
+            echo "::error::Khong tim thay build.gradle. Hay giai nen zip va up cac file (build.gradle, src/, settings.gradle...) len repo, khong up file .zip."
+            exit 1
+          fi
           d=$(dirname "$f")
           echo "dir=$d" >> "$GITHUB_OUTPUT"
           echo "Project dir: $d"
